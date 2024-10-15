@@ -119,6 +119,58 @@ return {
     ft = { "go", "gomod" },
     build = ':lua require("go.install").update_all_sync()',
   },
+  {
+    "williamboman/mason.nvim",
+    opts = {
+      ensure_installed = {
+        "rust-analyzer",
+      },
+    },
+  },
+  {
+    "neovim/nvim-lspconfig",
+    config = function()
+      require "configs.lspconfig"
+    end,
+  },
+  {
+    "mrcjkb/rustaceanvim",
+    version = "^4",
+    ft = { "rust" },
+    dependencies = "neovim/nvim-lspconfig",
+    config = function()
+      require "configs.rustaceanvim"
+    end,
+  },
+  {
+    "mfussenegger/nvim-dap",
+  },
+  {
+    "saecki/crates.nvim",
+    ft = { "toml" },
+    config = function(_, opts)
+      local crates = require "crates"
+      crates.setup(opts)
+      require("cmp").setup.buffer {
+        sources = { { name = "crates" } },
+      }
+      crates.show()
+    end,
+  },
+  {
+    "rust-lang/rust.vim",
+    ft = "rust",
+    init = function()
+      vim.g.rustfmt_autosave = 1
+    end,
+  },
+  {
+    "theHamsta/nvim-dap-virtual-text",
+    lazy = false,
+    config = function(_, _)
+      require("nvim-dap-virtual-text").setup()
+    end,
+  },
   -- {
   -- 	"nvim-treesitter/nvim-treesitter",
   -- 	opts = {
