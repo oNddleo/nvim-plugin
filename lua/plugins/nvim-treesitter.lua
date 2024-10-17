@@ -1,0 +1,33 @@
+return -- Highlight, edit, and navigate code
+{
+  "nvim-treesitter/nvim-treesitter",
+  opts = {
+    ensure_installed = {
+      "vim",
+      "lua",
+      "vimdoc",
+      "html",
+      "css",
+      "bash",
+      "html",
+      "javascript",
+      "json",
+      "dart",
+      "lua",
+      "markdown",
+      "markdown_inline",
+      "python",
+      "query",
+      "regex",
+      "tsx",
+      "typescript",
+      "vim",
+      "yaml",
+      "ruby",
+      "go",
+      "cpp",
+      "rust",
+      "jsonnet",
+    },
+  },
+}
