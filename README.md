@@ -7,10 +7,3 @@
 # Credits
 
 1) Lazyvim starter https://github.com/LazyVim/starter as nvchad's starter was inspired by Lazyvim's . It made a lot of things easier!
-
-
-# Copy to ~/.config/nvim
-
-```console
-git clone https://github.com/oNddleo/nvim-plugin ~/.config/nvim
-```

@@ -1,243 +1,169 @@
 return {
+  "nvim-lua/plenary.nvim",
+
+  {
+    "base46",
+    build = function()
+      require("base46").load_all_highlights()
+    end,
+  },
+
+  {
+    "ui",
+    lazy = false,
+    config = function()
+      require "
+    end,
+  },
+
+  "nvzone/volt",
+  "nvzone/menu",
+  { "nvzone/minty", cmd = { "Huefy", "Shades" } },
+
+  {
+    "nvim-tree/nvim-web-devicons",
+    opts = function()
+      dofile(vim.g.base46_cache .. "devicons")
+      return { override = require "icons.devicons" }
+    end,
+  },
+
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    event = "User FilePost",
+    opts = {
+      indent = { char = "│", highlight = "IblChar" },
+      scope = { char = "│", highlight = "IblScopeChar" },
+    },
+    config = function(_, opts)
+      dofile(vim.g.base46_cache .. "blankline")
+
+      local hooks = require "ibl.hooks"
+      hooks.register(hooks.type.WHITESPACE, hooks.builtin.hide_first_space_indent_level)
+      require("ibl").setup(opts)
+
+      dofile(vim.g.base46_cache .. "blankline")
+    end,
+  },
+
+  -- file managing , picker etc
+  {
+    "nvim-tree/nvim-tree.lua",
+    cmd = { "NvimTreeToggle", "NvimTreeFocus" },
+    opts = function()
+      return require "configs.nvimtree"
+    end,
+  },
+
+  {
+    "folke/which-key.nvim",
+    keys = { "<leader>", "<c-w>", '"', "'", "`", "c", "v", "g" },
+    cmd = "WhichKey",
+    opts = function()
+      dofile(vim.g.base46_cache .. "whichkey")
+      return {}
+    end,
+  },
+
+  -- formatting!
   {
     "stevearc/conform.nvim",
-    event = "BufWritePre",
-    cmd = { "ConformInfo" },
-    opts = function()
-      return require "configs.conform"
-    end,
-  },
-  --- lsp auto import
-  { "stevanmilic/nvim-lspimport" },
-  {
-    "neovim/nvim-lspconfig",
-    config = function()
-      require "configs.lspconfig"
-    end,
-  },
-  {
-    "nvim-neotest/nvim-nio",
-  },
-  {
-    "rcarriga/nvim-dap-ui",
-    dependencies = "mfussenegger/nvim-dap",
-    config = function()
-      local dap = require "dap"
-      local dapui = require "dapui"
-      dapui.setup()
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close()
-      end
-    end,
-  },
-  {
-    "mfussenegger/nvim-dap",
-  },
-  {
-    "mfussenegger/nvim-dap-python",
-    ft = "python",
-    dependencies = {
-      "mfussenegger/nvim-dap",
-      "rcarriga/nvim-dap-ui",
-      "nvim-neotest/nvim-nio",
+    opts = {
+      formatters_by_ft = { lua = { "stylua" } },
     },
-    config = function(_, _)
-      local path = "~/.local/share/nvim/mason/packages/debugpy/venv/bin/python"
-      require("dap-python").setup(path)
-    end,
   },
+
+  -- git stuff
   {
-    "nvimtools/none-ls.nvim",
-    ft = { "python" },
+    "lewis6991/gitsigns.nvim",
+    event = "User FilePost",
     opts = function()
-      return require "configs.python-none-ls"
+      return require "configs.gitsigns"
     end,
   },
+
+  -- lsp stuff
   {
     "williamboman/mason.nvim",
-    opts = {
-      ensure_installed = {
-        "black",
-        "debugpy",
-        "mypy",
-        "ruff-lsp",
-        "pyright",
-        "gopls",
-        "rust-analyzer",
+    cmd = { "Mason", "MasonInstall", "MasonInstallAll", "MasonUpdate" },
+    opts = function()
+      return require "configs.mason"
+    end,
+  },
+
+  {
+    "neovim/nvim-lspconfig",
+    event = "User FilePost",
+    config = function()
+      require("configs.lspconfig").defaults()
+    end,
+  },
+
+  -- load luasnips + cmp related in insert mode only
+  {
+    "hrsh7th/nvim-cmp",
+    event = "InsertEnter",
+    dependencies = {
+      {
+        -- snippet plugin
+        "L3MON4D3/LuaSnip",
+        dependencies = "rafamadriz/friendly-snippets",
+        opts = { history = true, updateevents = "TextChanged,TextChangedI" },
+        config = function(_, opts)
+          require("luasnip").config.set_config(opts)
+          require "configs.luasnip"
+        end,
+      },
+
+      -- autopairing of (){}[] etc
+      {
+        "windwp/nvim-autopairs",
+        opts = {
+          fast_wrap = {},
+          disable_filetype = { "TelescopePrompt", "vim" },
+        },
+        config = function(_, opts)
+          require("nvim-autopairs").setup(opts)
+
+          -- setup cmp for autopairs
+          local cmp_autopairs = require "nvim-autopairs.completion.cmp"
+          require("cmp").event:on("confirm_done", cmp_autopairs.on_confirm_done())
+        end,
+      },
+
+      -- cmp sources plugins
+      {
+        "saadparwaiz1/cmp_luasnip",
+        "hrsh7th/cmp-nvim-lua",
+        "hrsh7th/cmp-nvim-lsp",
+        "hrsh7th/cmp-buffer",
+        "hrsh7th/cmp-path",
       },
     },
-  },
-  {
-    "neovim/nvim-lspconfig",
-    config = function()
-      require "configs.lspconfig"
-    end,
-  },
-  {
-    "nvimtools/none-ls.nvim",
-    ft = { "go" },
     opts = function()
-      return require "configs.go-none-ls"
+      return require "configs.cmp"
     end,
   },
+
   {
-    "olexsmir/gopher.nvim",
-    ft = "go",
-    config = function(_, opts)
-      require("gopher").setup(opts)
-    end,
-    build = function()
-      vim.cmd [[silent! GoInstallDeps]]
+    "nvim-telescope/telescope.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    cmd = "Telescope",
+    opts = function()
+      return require "configs.telescope"
     end,
   },
-  {
-    "dreamsofcode-io/nvim-dap-go",
-    ft = "go",
-    dependencies = "mfussenegger/nvim-dap",
-    config = function(_, opts)
-      require("dap-go").setup(opts)
-    end,
-  },
-  {
-    "ray-x/go.nvim",
-    dependencies = {
-      "ray-x/guihua.lua",
-      "neovim/nvim-lspconfig",
-      "nvim-treesitter/nvim-treesitter",
-    },
-    config = function()
-      require("go").setup()
-    end,
-    event = { "CmdlineEnter" },
-    ft = { "go", "gomod" },
-    build = ':lua require("go.install").update_all_sync()',
-  },
-  {
-    "neovim/nvim-lspconfig",
-    config = function()
-      require "configs.lspconfig"
-    end,
-  },
-  {
-    "mrcjkb/rustaceanvim",
-    version = "^4",
-    ft = { "rust" },
-    dependencies = "neovim/nvim-lspconfig",
-    config = function()
-      require "configs.rustaceanvim"
-    end,
-  },
-  {
-    "mfussenegger/nvim-dap",
-  },
-  {
-    "saecki/crates.nvim",
-    ft = { "toml" },
-    config = function(_, opts)
-      local crates = require "crates"
-      crates.setup(opts)
-      require("cmp").setup.buffer {
-        sources = { { name = "crates" } },
-      }
-      crates.show()
-    end,
-  },
-  {
-    "rust-lang/rust.vim",
-    ft = "rust",
-    init = function()
-      vim.g.rustfmt_autosave = 1
-    end,
-  },
-  {
-    "theHamsta/nvim-dap-virtual-text",
-    lazy = false,
-    config = function(_, _)
-      require("nvim-dap-virtual-text").setup()
-    end,
-  },
-  -- Highlight, edit, and navigate code
+
   {
     "nvim-treesitter/nvim-treesitter",
-    opts = {
-      ensure_installed = {
-        "vim",
-        "lua",
-        "vimdoc",
-        "html",
-        "css",
-      },
-    },
-  },
-  -- Highlight todo, notes, etc in comments
-  {
-    "folke/todo-comments.nvim",
-    event = "VimEnter",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    opts = { signs = false },
-  },
-  -- Collection of various small independent plugins/modules
-  {
-    "echasnovski/mini.nvim",
-    config = function()
-      -- Better Around/Inside textobjects
-      --
-      -- Examples:
-      --  - va)  - [V]isually select [A]round [)]paren
-      --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
-      --  - ci'  - [C]hange [I]nside [']quote
-      require("mini.ai").setup { n_lines = 500 }
-
-      -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      --
-      -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-      -- - sd'   - [S]urround [D]elete [']quotes
-      -- - sr)'  - [S]urround [R]eplace [)] [']
-      require("mini.surround").setup()
-
-      -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
-      local statusline = require "mini.statusline"
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
-
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return "%2l:%-2v"
-      end
-
-      -- ... and there is more!
-      --  Check out: https://github.com/echasnovski/mini.nvim
+    event = { "BufReadPost", "BufNewFile" },
+    cmd = { "TSInstall", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
+    build = ":TSUpdate",
+    opts = function()
+      return require "configs.nvim-treesitter"
     end,
-  },
-  {
-    -- amongst your other plugins
-    {
-      "akinsho/toggleterm.nvim",
-      version = "*",
-      config = true,
-    },
-  },
-  {
-    "rmagatti/auto-session",
-    lazy = false,
-
-    ---enables autocomplete for opts
-    ---@module "auto-session"
-    ---@type AutoSession.Config
-    opts = {
-      suppressed_dirs = { "Desktop/rd/" },
-      -- log_level = 'debug',
-    },
+    config = function(_, opts)
+      require("nvim-treesitter.configs").setup(opts)
+    end,
   },
 }
