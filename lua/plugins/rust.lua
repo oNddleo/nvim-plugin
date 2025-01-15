@@ -1,8 +1,9 @@
 return {
   {
     'mrcjkb/rustaceanvim',
-    version = '^3', -- Recommended
+    version = '^5', -- Recommended
     ft = { 'rust' },
+    lazy = false,
     -- dependencies = {
     --   "nvim-lua/plenary.nvim",
     --   {
@@ -13,7 +14,7 @@ return {
     -- config = function()
     --   vim.g.rustaceanvim = {
     --     inlay_hints = {
-    --       highlight = "NonText",
+    --       highlight = "nontext",
     --     },
     --     tools = {
     --       hover_actions = {
